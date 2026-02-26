@@ -678,6 +678,8 @@ export default function NeuroCode() {
       color: #E2E8F0;
       font-family: 'Syne', sans-serif;
       min-height: 100vh;
+      display: flex;
+      justify-content: center;
     }
 
     .nc-root {
