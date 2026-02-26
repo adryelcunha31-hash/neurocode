@@ -1,6 +1,45 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
 // ============================================================
+// SUPABASE CONFIG
+// ============================================================
+const SUPABASE_URL = "https://adifkeixdsxcmbpefpqv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_pYChTJWi50_I2ulbEhGplg_ld4ct57C";
+
+const saveToSupabase = async (userData, analysis) => {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({
+        nome: userData.name,
+        email: userData.email,
+        perfil: analysis.profile,
+        risco: analysis.riskScore,
+        disciplina: parseFloat(analysis.scores.discipline.toFixed(2)),
+        frustracao: parseFloat(analysis.scores.frustration_tolerance.toFixed(2)),
+        abstracao: parseFloat(analysis.scores.abstraction.toFixed(2)),
+        raciocinio: parseFloat(analysis.scores.reasoning_depth.toFixed(2)),
+        ego: parseFloat(analysis.scores.ego_control.toFixed(2)),
+        autoconsciencia: parseFloat(analysis.scores.self_awareness.toFixed(2)),
+        gargalo: analysis.bottleneck.name,
+      })
+    });
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("Supabase error:", err);
+    }
+  } catch (e) {
+    console.error("Erro ao salvar:", e);
+  }
+};
+
+// ============================================================
 // COGNITIVE DIAGNOSTIC ENGINE
 // ============================================================
 
@@ -606,6 +645,7 @@ export default function NeuroCode() {
         const prompt = generatePersonalizedPrompt(userData, result);
         setAnalysis(result);
         setGeneratedPrompt(prompt);
+        saveToSupabase(userData, result);
         setTimeout(() => transition("results"), 2000);
       }, 500);
     }
@@ -638,8 +678,6 @@ export default function NeuroCode() {
       color: #E2E8F0;
       font-family: 'Syne', sans-serif;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
     }
 
     .nc-root {
@@ -648,8 +686,6 @@ export default function NeuroCode() {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 0 auto;
-      width: 100%;
     }
 
     .nc-fade {
